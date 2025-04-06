@@ -41,39 +41,24 @@ class MySeleniumTests(StaticLiveServerTestCase):
 
     def test_grup(self):
         self.selenium.get('%s%s' % (self.live_server_url, '/admin/login/'))
-        #self.assertEqual( self.selenium.title , "Log in | Django site admin" )
         self.selenium.find_element(By.NAME, "username").send_keys("isard")
         self.selenium.find_element(By.NAME, "password").send_keys("pirineus")
         self.selenium.find_element(By.XPATH,'//input[@value="Log in"]').click()
 
-        #self.selenium.get('%s%s' % (self.live_server_url, '/admin/auth/group/'))
         self.selenium.find_element(By.LINK_TEXT, "Groups").click() # Anem a la secció de grups
-        self.assertNotEqual(self.selenium.title, "Group_1") # Comprovem si el grup apareix
+        page_source = self.selenium.page_source # Comprovem si el grup apareix
+        self.assertIn("Group_1", self.selenium.page_source) 
 
         self.selenium.find_element(By.LINK_TEXT, "Home").click() # Tornem a l'inici
         self.selenium.find_element(By.LINK_TEXT, "Users").click() # Anem a la secció usuaris
         self.selenium.find_element(By.LINK_TEXT, "ADD USER").click() # Anem a la secció d'afegir usuaris
 
-        grups_seleccio = self.selenium.find_element(By.NAME, "Groups") # Busquem la selecció de grups per l'usuari
+        self.selenium.find_element(By.NAME, "username").send_keys("user_test") # Omplir nom
+        self.selenium.find_element(By.NAME, "password1").send_keys("User_IOC") # Omplir pw
+        self.selenium.find_element(By.NAME, "password2").send_keys("User_IOC")
+        self.selenium.find_element(By.NAME, "_continue").click()
+
+        wait = WebDriverWait(self.selenium, 10)
+        grups_seleccio = wait.until(EC.precense_of_element_located((By.NAME, "groups"))) # Busquem la selecció de grups per l'usuari
         opcions = grups_seleccio.text # Recollida d'opcions de selecció de grup
-        self.assertEqual(self.selenium.title, "Grup_1", opcions) # Comprova que Grup_1 existeix
-
-
-
-
-
-
-# Testejar que un element NO existeix
-# Aquesta localització de l'element ens serveix també a mode de ASSERT
-# Si no localitza l'element, llençarà una NoSuchElementException
-#self.selenium.find_element(By.XPATH,"//button[text()='Log out']")
-
-
-# Però què passa si volem comprovar que l'element NO existeix?
-#from selenium.common.exceptions import NoSuchElementException
-#...
-#try:
-#self.selenium.find_element(By.XPATH,"//a[text()='Log out']")
-#assert False, "Trobat element que NO hi ha de ser"
-#except NoSuchElementException:
-#pass
+        self.assertIn("Grup_1", opcions) # Comprova que Grup_1 existeix
